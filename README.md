@@ -218,6 +218,8 @@ INSTALL_DEBUG=0
 MAKEPKG_FLAGS=(-c --noconfirm)
 AUR_RPC=https://aur.archlinux.org/rpc
 SLEEP_AUR_REVIEW=0
+UPDATE_CHECK=1
+UPDATE_CHECK_INTERVAL=7200
 ```
 
 | Variable | Description |
@@ -229,6 +231,8 @@ SLEEP_AUR_REVIEW=0
 | `MAKEPKG_FLAGS` | Extra flags passed to `makepkg`. |
 | `AUR_RPC` | AUR RPC endpoint. |
 | `SLEEP_AUR_REVIEW` | Review the `PKGBUILD` before every build when set to `1`. |
+| `UPDATE_CHECK` | Check for a new sleep-aur release when running commands (default: `1`). |
+| `UPDATE_CHECK_INTERVAL` | Seconds between update checks (default: `7200`, or 2 hours). |
 
 The configuration file is loaded as shell code and belongs to the user. Review third-party configuration before using it.
 

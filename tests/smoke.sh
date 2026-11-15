@@ -9,6 +9,7 @@ export SLEEP_AUR_STATE_DIR="${TMP_ROOT}/state"
 export SLEEP_AUR_BUILD_DIR="${TMP_ROOT}/build"
 export SLEEP_AUR_CONFIG_FILE="${TMP_ROOT}/config"
 export SLEEP_AUR_LEGACY_DIR="${TMP_ROOT}/legacy"
+export UPDATE_CHECK=0
 
 fail() {
     printf 'FAIL: %s\n' "$*" >&2
@@ -43,6 +44,23 @@ assert_contains "$output" "No packages managed" "list"
 printf '==> Empty logs\n'
 output=$("${ROOT}/src/sleep-aur" logs 2>&1)
 assert_contains "$output" "No logs found" "logs"
+
+printf '==> Update check\n'
+fake_bin="${TMP_ROOT}/fakebin"
+mkdir -p "$fake_bin"
+cat > "${fake_bin}/curl" <<'EOF'
+#!/usr/bin/env bash
+printf 'https://github.com/the-sleepless/sleep-aur/releases/tag/v9.9.9'
+EOF
+chmod +x "${fake_bin}/curl"
+output=$(PATH="${fake_bin}:${PATH}" UPDATE_CHECK=1 UPDATE_CHECK_INTERVAL=0 \
+    SLEEP_AUR_STATE_DIR="${TMP_ROOT}/update-state" \
+    "${ROOT}/src/sleep-aur" list 2>&1)
+assert_contains "$output" "A new version of sleep-aur is available: 9.9.9" "update-check"
+output=$(PATH="${fake_bin}:${PATH}" UPDATE_CHECK=1 UPDATE_CHECK_INTERVAL=7200 \
+    SLEEP_AUR_STATE_DIR="${TMP_ROOT}/update-state" \
+    "${ROOT}/src/sleep-aur" list 2>&1)
+[[ $output != *"A new version of sleep-aur"* ]] || fail "update notice repeated"
 
 printf '==> Manifest\n'
 mkdir -p "${SLEEP_AUR_STATE_DIR}/db"

@@ -889,6 +889,11 @@ dispatch() {
     shift || true
 
     case "$command" in
+        ""|self|help|-h|--help|version|-V|--version) ;;
+        *) check_for_updates ;;
+    esac
+
+    case "$command" in
         install|i)
             cmd_install "$@"
             ;;

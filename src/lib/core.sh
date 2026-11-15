@@ -29,6 +29,8 @@ INSTALL_DEBUG=${INSTALL_DEBUG:-0}
 AUR_RPC=${AUR_RPC:-https://aur.archlinux.org/rpc}
 AUR_GIT_URL=${AUR_GIT_URL:-https://aur.archlinux.org}
 SLEEP_AUR_REVIEW=${SLEEP_AUR_REVIEW:-0}
+UPDATE_CHECK=${UPDATE_CHECK:-1}
+UPDATE_CHECK_INTERVAL=${UPDATE_CHECK_INTERVAL:-7200}
 MAKEPKG_FLAGS=(-c --noconfirm)
 
 ASSUME_YES=${ASSUME_YES:-0}
@@ -218,6 +220,68 @@ version_compare() {
         printf '0\n'
     else
         printf '1\n'
+    fi
+}
+
+fetch_latest_version() {
+    local final_url=""
+
+    final_url=$(curl -fsSL \
+        --connect-timeout 1 \
+        --max-time 2 \
+        -o /dev/null \
+        -w '%{url_effective}' \
+        "https://github.com/${SLEEP_AUR_REPO}/releases/latest" 2>/dev/null) || return 1
+
+    [[ $final_url == */tag/* ]] || return 1
+
+    final_url=${final_url##*/}
+    printf '%s' "${final_url#v}"
+}
+
+check_for_updates() {
+    local interval=${UPDATE_CHECK_INTERVAL:-7200}
+    local cache_file="${STATE_DIR}/update-check"
+    local now=0
+    local checked_at=0
+    local latest=""
+    local notified=""
+    local fetched=""
+
+    [[ ${UPDATE_CHECK:-1} == 1 ]] || return 0
+    (( QUIET )) && return 0
+    command -v curl >/dev/null 2>&1 || return 0
+
+    [[ $interval =~ ^[0-9]+$ ]] || interval=7200
+
+    now=$(date +%s)
+
+    if [[ -r $cache_file ]]; then
+        read -r checked_at latest notified < "$cache_file" || true
+    fi
+
+    [[ $checked_at =~ ^[0-9]+$ ]] || checked_at=0
+    (( checked_at > now )) && checked_at=0
+
+    if (( now - checked_at >= interval )); then
+        if fetched=$(fetch_latest_version); then
+            latest=$fetched
+        fi
+
+        mkdir -p -- "$STATE_DIR" 2>/dev/null || true
+        printf '%s %s %s\n' "$now" "$latest" "$notified" > "$cache_file" 2>/dev/null || true
+    fi
+
+    [[ -n $latest ]] || return 0
+    [[ $latest == "$SLEEP_AUR_VERSION" ]] && return 0
+
+    if [[ $(version_compare "$latest" "$SLEEP_AUR_VERSION") == 1 && $latest != "$notified" ]]; then
+        printf '\n' >&2
+        log_warn "A new version of sleep-aur is available: ${latest} (installed: ${SLEEP_AUR_VERSION})."
+        log_info "Update with: sleep-aur self update"
+
+        notified=$latest
+        printf '%s %s %s\n' "$now" "$latest" "$notified" > "$cache_file" 2>/dev/null || true
     fi
 }
 
