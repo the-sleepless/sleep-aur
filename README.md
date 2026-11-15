@@ -30,6 +30,8 @@ bash /tmp/installer.sh
 
 Avoid `curl ... | bash`. Download the installer, inspect it, and then run it.
 
+On Arch Linux, if `git`, `jq`, or the `base-devel` group are missing, the installer asks whether it should install them with `pacman` before continuing.
+
 The default installation paths are:
 
 ```text

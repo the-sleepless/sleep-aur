@@ -36,6 +36,7 @@ PROGRESS_MESSAGE=""
 PROGRESS_ENABLED=0
 PROGRESS_COLOR=0
 SPINNERS='|/-\'
+MISSING_PKGS=()
 
 if [[ -t 1 && -z ${NO_COLOR:-} && ${TERM:-dumb} != "dumb" ]]; then
     COLORS=1
@@ -291,6 +292,57 @@ request_privileges() {
     ensure_privileges
 }
 
+run_as_root() {
+    if (( EUID == 0 )); then
+        "$@"
+    elif command -v "$SUDO_CMD" >/dev/null 2>&1; then
+        "$SUDO_CMD" "$@"
+    else
+        die "Root or '${SUDO_CMD}' is required to install dependencies."
+    fi
+}
+
+collect_missing_packages() {
+    local cmd
+    local need_base_devel=0
+
+    MISSING_PKGS=()
+
+    for cmd in git jq; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            MISSING_PKGS+=("$cmd")
+        fi
+    done
+
+    for cmd in gcc make fakeroot; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            need_base_devel=1
+            break
+        fi
+    done
+
+    if (( need_base_devel )); then
+        MISSING_PKGS+=("base-devel")
+    fi
+}
+
+confirm_install_dependencies() {
+    local answer=""
+
+    printf '\n' >&2
+    log_warn "Missing dependencies: ${MISSING_PKGS[*]}"
+    log_info "They are required to build and install AUR packages."
+
+    if [[ ! -t 0 ]]; then
+        log_error "Cannot confirm dependency installation without an interactive terminal."
+        return 1
+    fi
+
+    printf 'Install the missing dependencies now? [Y/n] ' >&2
+    read -r answer || return 1
+    [[ -z $answer || $answer =~ ^[Yy]([Ee][Ss])?$ ]]
+}
+
 normalize_tag() {
     local tag=$1
 
@@ -502,6 +554,29 @@ if [[ $MODE == "release" ]]; then
     command -v curl >/dev/null 2>&1 || die "curl not found."
     command -v tar >/dev/null 2>&1 || die "tar not found."
     command -v sha256sum >/dev/null 2>&1 || die "sha256sum not found."
+fi
+
+if [[ -f /etc/arch-release ]] && command -v pacman >/dev/null 2>&1; then
+    collect_missing_packages
+
+    if ((${#MISSING_PKGS[@]} > 0)); then
+        if ! confirm_install_dependencies; then
+            log_info "Installation cancelled."
+            log_info "Install them manually with: ${SUDO_CMD} pacman -S --needed ${MISSING_PKGS[*]}"
+            exit 1
+        fi
+
+        printf '\n' >&2
+        log_info "Installing missing dependencies: ${MISSING_PKGS[*]}"
+        if ! run_as_root pacman -S --needed --noconfirm -- "${MISSING_PKGS[@]}"; then
+            die "Failed to install dependencies."
+        fi
+
+        collect_missing_packages
+        if ((${#MISSING_PKGS[@]} > 0)); then
+            die "Dependencies are still missing: ${MISSING_PKGS[*]}"
+        fi
+    fi
 fi
 
 request_privileges
