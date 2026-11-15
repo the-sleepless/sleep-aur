@@ -826,6 +826,7 @@ cmd_self() {
     case "$action" in
         version)
             print_version
+            printf 'Update check: every %ss\n' "${UPDATE_CHECK_INTERVAL:-7200}"
             ;;
         path)
             printf 'Root:   %s\n' "$SLEEP_AUR_ROOT"
