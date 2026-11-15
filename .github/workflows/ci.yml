@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck jq
+
+      - name: Validate syntax
+        run: |
+          bash -n installer.sh
+          bash -n src/sleep-aur
+          bash -n src/lib/*.sh
+          bash -n tests/smoke.sh
+
+      - name: ShellCheck
+        run: shellcheck -x -S error installer.sh src/sleep-aur src/lib/*.sh tests/smoke.sh
+
+      - name: Smoke test
+        run: ./tests/smoke.sh

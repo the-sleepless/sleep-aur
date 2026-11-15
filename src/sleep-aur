@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+SELF=$(readlink -f -- "${BASH_SOURCE[0]}")
+SLEEP_AUR_ROOT=$(cd -- "$(dirname -- "$SELF")" && pwd)
+export SLEEP_AUR_ROOT
+
+source "${SLEEP_AUR_ROOT}/lib/ui.sh"
+source "${SLEEP_AUR_ROOT}/lib/core.sh"
+source "${SLEEP_AUR_ROOT}/lib/manifest.sh"
+source "${SLEEP_AUR_ROOT}/lib/aur.sh"
+source "${SLEEP_AUR_ROOT}/lib/pkg.sh"
+source "${SLEEP_AUR_ROOT}/lib/commands.sh"
+
+main "$@"

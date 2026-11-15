@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate version
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          file_version="$(tr -d '[:space:]' < src/VERSION)"
+          if [[ "$tag_version" != "$file_version" ]]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match src/VERSION (${file_version})" >&2
+            exit 1
+          fi
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          tar -czf dist/sleep-aur.tar.gz -C src .
+          (
+            cd dist
+            sha256sum sleep-aur.tar.gz > sleep-aur.tar.gz.sha256
+          )
+          sha256sum installer.sh > dist/installer.sh.sha256
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/sleep-aur.tar.gz
+            dist/sleep-aur.tar.gz.sha256
+            dist/installer.sh.sha256
+            installer.sh
+          generate_release_notes: true
