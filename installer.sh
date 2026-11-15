@@ -281,6 +281,16 @@ ensure_privileges() {
     fi
 }
 
+request_privileges() {
+    if (( EUID == 0 )) || user_can_write_prefix; then
+        return 0
+    fi
+
+    printf '\n' >&2
+    log_info "Administrator privileges are required for ${PREFIX}."
+    ensure_privileges
+}
+
 normalize_tag() {
     local tag=$1
 
@@ -488,13 +498,17 @@ if command -v pacman >/dev/null 2>&1 && pacman -Qo "$TARGET_BIN" >/dev/null 2>&1
     die "${TARGET_BIN} belongs to a pacman package. Update it through the package manager."
 fi
 
-if [[ $MODE == "local" ]]; then
-    load_local
-else
+if [[ $MODE == "release" ]]; then
     command -v curl >/dev/null 2>&1 || die "curl not found."
     command -v tar >/dev/null 2>&1 || die "tar not found."
     command -v sha256sum >/dev/null 2>&1 || die "sha256sum not found."
+fi
 
+request_privileges
+
+if [[ $MODE == "local" ]]; then
+    load_local
+else
     TMP_DIR=$(mktemp -d) || die "Failed to create a temporary directory."
     download_release
 fi
