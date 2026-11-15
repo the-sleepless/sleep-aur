@@ -34,6 +34,8 @@ On Arch Linux, if `git`, `jq`, or the `base-devel` group are missing, the instal
 
 sleep-aur only supports Arch Linux and derivatives. The release installer exits early on other distributions.
 
+If sleep-aur is already installed, the installer compares the installed version with the target release. It exits without changing anything when they match, and updates otherwise.
+
 The default installation paths are:
 
 ```text

@@ -377,6 +377,165 @@ normalize_tag() {
     fi
 }
 
+normalize_version() {
+    local version=$1
+
+    version=${version#v}
+    version=${version#V}
+    printf '%s' "$version"
+}
+
+normalize_for_vercmp() {
+    local version=$1
+
+    if [[ $version =~ ^([0-9][^-]*)-([A-Za-z].*)$ ]]; then
+        version="${BASH_REMATCH[1]}${BASH_REMATCH[2]}"
+    fi
+
+    printf '%s' "$version"
+}
+
+compare_versions() {
+    local a b
+    local base_a base_b pre_a pre_b
+
+    a=$(normalize_version "$1")
+    b=$(normalize_version "$2")
+
+    [[ $a == "$b" ]] && { printf '0'; return 0; }
+
+    a=${a%%+*}
+    b=${b%%+*}
+
+    [[ $a == "$b" ]] && { printf '0'; return 0; }
+
+    if command -v vercmp >/dev/null 2>&1; then
+        vercmp "$(normalize_for_vercmp "$a")" "$(normalize_for_vercmp "$b")"
+        return 0
+    fi
+
+    base_a=${a%%-*}
+    base_b=${b%%-*}
+    pre_a=""
+    pre_b=""
+
+    [[ $a == *-* ]] && pre_a=${a#*-}
+    [[ $b == *-* ]] && pre_b=${b#*-}
+
+    if [[ $base_a == "$base_b" && -n $pre_a && -z $pre_b ]]; then
+        printf '%s' '-1'
+        return 0
+    fi
+
+    if [[ $base_a == "$base_b" && -z $pre_a && -n $pre_b ]]; then
+        printf '%s' '1'
+        return 0
+    fi
+
+    if [[ $(printf '%s\n%s\n' "$a" "$b" | LC_ALL=C sort -V | tail -n 1) == "$a" ]]; then
+        printf '1'
+    else
+        printf '%s' '-1'
+    fi
+}
+
+versions_equal() {
+    [[ $(compare_versions "$1" "$2") == 0 ]]
+}
+
+version_is_newer() {
+    [[ $(compare_versions "$1" "$2") == 1 ]]
+}
+
+installed_version() {
+    local version=""
+
+    if [[ -r "${TARGET_CURRENT}/VERSION" ]]; then
+        version=$(tr -d '[:space:]' < "${TARGET_CURRENT}/VERSION")
+    fi
+
+    if [[ -z $version && -x "$TARGET_BIN" ]]; then
+        version=$("$TARGET_BIN" --version 2>/dev/null | awk 'NR==1 {print $NF}' || true)
+    fi
+
+    printf '%s' "$version"
+}
+
+sleep_aur_is_installed() {
+    [[ -e "$TARGET_BIN" || -e "$TARGET_CURRENT" ]]
+}
+
+target_version_early() {
+    if [[ $MODE == "local" ]]; then
+        if [[ -n $SCRIPT_DIR && -r "${SCRIPT_DIR}/src/VERSION" ]]; then
+            tr -d '[:space:]' < "${SCRIPT_DIR}/src/VERSION"
+        fi
+        return 0
+    fi
+
+    if [[ $TAG == "latest" ]]; then
+        local final_url=""
+        final_url=$(curl -fsSL -o /dev/null -w '%{url_effective}' \
+            "https://github.com/${REPO}/releases/latest" 2>/dev/null) || return 1
+
+        if [[ $final_url == */tag/* ]]; then
+            normalize_version "${final_url##*/}"
+        fi
+        return 0
+    fi
+
+    normalize_version "$(normalize_tag "$TAG")"
+}
+
+report_installed_state() {
+    local installed=""
+    local target=""
+
+    sleep_aur_is_installed || return 0
+
+    installed=$(installed_version)
+    target=$(target_version_early || true)
+
+    if [[ -z $installed ]]; then
+        log_info "sleep-aur is already installed (version unknown). Updating..."
+        return 0
+    fi
+
+    if [[ -n $target ]] && versions_equal "$installed" "$target"; then
+        log_info "sleep-aur ${installed} is already installed and up to date."
+        log_info "Nothing to do."
+        exit 0
+    fi
+
+    if [[ -n $target ]] && [[ $MODE == "release" && $TAG == "latest" ]] &&
+        version_is_newer "$installed" "$target"; then
+        log_warn "Installed version ${installed} is newer than the latest release (${target})."
+        log_info "Nothing to do."
+        exit 0
+    fi
+
+    if [[ -n $target ]]; then
+        log_info "sleep-aur ${installed} is already installed. Updating to ${target}..."
+    else
+        log_info "sleep-aur ${installed} is already installed. Updating..."
+    fi
+}
+
+skip_if_same_version() {
+    local installed=""
+
+    sleep_aur_is_installed || return 0
+
+    installed=$(installed_version)
+    [[ -n $installed ]] || return 0
+
+    if versions_equal "$installed" "$VERSION"; then
+        log_info "sleep-aur ${installed} is already installed and up to date."
+        log_info "Nothing to do."
+        exit 0
+    fi
+}
+
 validate_tree() {
     local dir=$1
 
@@ -579,6 +738,8 @@ if [[ $MODE == "release" ]]; then
     command -v sha256sum >/dev/null 2>&1 || die "sha256sum not found."
 fi
 
+report_installed_state
+
 if [[ -f /etc/arch-release ]] && command -v pacman >/dev/null 2>&1; then
     collect_missing_packages
 
@@ -610,6 +771,8 @@ else
     TMP_DIR=$(mktemp -d) || die "Failed to create a temporary directory."
     download_release
 fi
+
+skip_if_same_version
 
 ensure_privileges
 

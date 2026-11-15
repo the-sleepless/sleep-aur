@@ -70,6 +70,11 @@ output=$("${TMP_ROOT}/prefix/bin/sleep-aur" --version)
 expected=$(<"${ROOT}/src/VERSION")
 assert_contains "$output" "$expected" "installed version"
 
+printf '==> Already installed\n'
+output=$(PREFIX="${TMP_ROOT}/prefix" "${ROOT}/installer.sh" --local --yes 2>&1)
+assert_contains "$output" "already installed" "already-installed"
+assert_contains "$output" "Nothing to do" "already-installed"
+
 printf '==> Uninstall\n'
 PREFIX="${TMP_ROOT}/prefix" "${ROOT}/installer.sh" --uninstall --yes >/dev/null
 [[ ! -e "${TMP_ROOT}/prefix/bin/sleep-aur" ]] || fail "binary was not removed"
