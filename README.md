@@ -32,6 +32,8 @@ Avoid `curl ... | bash`. Download the installer, inspect it, and then run it.
 
 On Arch Linux, if `git`, `jq`, or the `base-devel` group are missing, the installer asks whether it should install them with `pacman` before continuing.
 
+sleep-aur only supports Arch Linux and derivatives. The release installer exits early on other distributions.
+
 The default installation paths are:
 
 ```text

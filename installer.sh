@@ -292,6 +292,25 @@ request_privileges() {
     ensure_privileges
 }
 
+require_arch_installer() {
+    if [[ -f /etc/arch-release ]]; then
+        return 0
+    fi
+
+    local distro="unknown"
+
+    if [[ -r /etc/os-release ]]; then
+        distro=$(
+            # shellcheck disable=SC1091
+            . /etc/os-release
+            printf '%s' "${PRETTY_NAME:-${NAME:-${ID:-unknown}}}"
+        )
+    fi
+
+    log_error "sleep-aur only supports Arch Linux and derivatives."
+    die "Detected: ${distro}."
+}
+
 run_as_root() {
     if (( EUID == 0 )); then
         "$@"
@@ -544,6 +563,10 @@ fi
 
 if (( DO_PURGE )); then
     die "--purge can only be used together with --uninstall."
+fi
+
+if [[ $MODE == "release" ]]; then
+    require_arch_installer
 fi
 
 if command -v pacman >/dev/null 2>&1 && pacman -Qo "$TARGET_BIN" >/dev/null 2>&1; then
