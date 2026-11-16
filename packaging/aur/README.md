@@ -1,5 +1,7 @@
 # AUR packaging
 
+> **Status:** not published on the AUR yet. AUR account registration is currently restricted.
+
 This directory contains the AUR package definition for `sleep-aur`.
 
 The GitHub repository is the source of truth. On every release, update `pkgver`,

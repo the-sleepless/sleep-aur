@@ -101,18 +101,6 @@ To uninstall:
 ./installer.sh --uninstall --purge
 ```
 
-### From the AUR
-
-An AUR package definition is maintained in [`packaging/aur`](packaging/aur). Once the package is published, install it with:
-
-```bash
-yay -S sleep-aur
-# or
-paru -S sleep-aur
-```
-
-See [`packaging/aur/README.md`](packaging/aur/README.md) for publishing and update instructions.
-
 ---
 
 ## Usage
