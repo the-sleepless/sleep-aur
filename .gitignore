@@ -4,8 +4,3 @@ dist/
 
 *.log
 .DS_Store
-
-packaging/aur/src/
-packaging/aur/pkg/
-packaging/aur/*.pkg.tar.zst
-packaging/aur/LICENSE

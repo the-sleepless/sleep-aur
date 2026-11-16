@@ -40,7 +40,6 @@ Validate syntax:
 bash -n installer.sh
 bash -n src/sleep-aur
 bash -n src/lib/*.sh
-bash -n packaging/aur/PKGBUILD
 ```
 
 Lint:
@@ -65,5 +64,3 @@ git tag v3.1.8
 git push origin v3.1.8
 ```
 
-When the version changes, update `packaging/aur/PKGBUILD` and regenerate
-`packaging/aur/.SRCINFO` as described in `packaging/aur/README.md`.

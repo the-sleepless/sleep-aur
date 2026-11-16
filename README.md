@@ -306,7 +306,6 @@ Validate syntax:
 bash -n installer.sh
 bash -n src/sleep-aur
 bash -n src/lib/*.sh
-bash -n packaging/aur/PKGBUILD
 ```
 
 Lint:

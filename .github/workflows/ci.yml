@@ -24,7 +24,6 @@ jobs:
           bash -n src/sleep-aur
           bash -n src/lib/*.sh
           bash -n tests/smoke.sh
-          bash -n packaging/aur/PKGBUILD
 
       - name: ShellCheck
         run: shellcheck -x -S error installer.sh src/sleep-aur src/lib/*.sh tests/smoke.sh
