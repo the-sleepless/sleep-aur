@@ -95,6 +95,10 @@ resolve_dependencies() {
 
         if LC_ALL=C pacman -Si -- "$name" &>/dev/null; then
             repo_deps+=("$dep")
+        elif LC_ALL=C pacman -Sp --noconfirm -- "$dep" &>/dev/null; then
+            # Virtual dependency provided by a repository package
+            # (e.g. mime-types -> mailcap, ttf-font -> a font package).
+            repo_deps+=("$dep")
         elif aur_exists "$name"; then
             aur_deps+=("$dep")
         else
