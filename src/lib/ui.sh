@@ -113,21 +113,6 @@ prompt_yes_no() {
     [[ $answer =~ ^[SsYy]$ ]]
 }
 
-prompt_line() {
-    local prompt=$1
-    local default=${2:-}
-    local answer=""
-
-    if [[ -n $default ]]; then
-        read -r -p "${prompt} [${default}] " answer || return 1
-        answer=${answer:-$default}
-    else
-        read -r -p "${prompt} " answer || return 1
-    fi
-
-    printf '%s' "$answer"
-}
-
 draw_progress() {
     local percent=$1
     local msg=$2
