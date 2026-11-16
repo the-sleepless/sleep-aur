@@ -779,6 +779,10 @@ ensure_privileges
 if ! run_progress 88 "Installing files" install_tree "${TMP_DIR}/src"; then
     die "Failed to install sleep-aur."
 fi
+
+cleanup
+TMP_DIR=""
+
 progress_complete "sleep-aur ${VERSION} installed."
 
 printf '    Executable: %s\n' "$TARGET_BIN"

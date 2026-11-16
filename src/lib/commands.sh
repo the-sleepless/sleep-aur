@@ -877,6 +877,9 @@ cmd_self() {
             else
                 bash "$installer"
             fi
+
+            rm -rf -- "$tmp"
+            unregister_temp "$tmp"
             ;;
         *)
             log_error "Usage: sleep-aur self <version|path|update|uninstall>"

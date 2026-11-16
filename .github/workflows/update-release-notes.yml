@@ -1,0 +1,35 @@
+name: Update release notes
+
+on:
+  push:
+    paths:
+      - '.github/release-notes/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          for file in .github/release-notes/*.md; do
+            version=$(basename "$file" .md)
+            tag="v${version}"
+
+            if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "Updating ${tag}"
+              gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --notes-file "$file"
+            else
+              echo "Skipping ${tag}: release not found"
+            fi
+          done
