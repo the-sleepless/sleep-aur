@@ -1,0 +1,70 @@
+name: Bug report
+description: Report a reproducible problem with sleep-aur
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Please include enough detail to reproduce it.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the problem and its impact.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `sleep-aur ...`
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: sleep-aur version
+      description: Output of `sleep-aur self version`.
+      placeholder: sleep-aur 3.1.7
+    validations:
+      required: true
+
+  - type: input
+    id: system
+    attributes:
+      label: System
+      description: Arch Linux or derivative, and the kernel version.
+      placeholder: Arch Linux, 6.12.1-arch1-1
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant output or build logs. Remove any sensitive information.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched the existing issues before opening this report.
+          required: true
+        - label: I am using the latest release of sleep-aur.
+          required: true

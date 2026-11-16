@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest an improvement for sleep-aur
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        sleep-aur values a small, auditable codebase. Please explain the problem
+        before proposing a large feature.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem would this feature solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like sleep-aur to behave?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other tools or workarounds you have tried.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This feature keeps the codebase small and auditable.
+          required: true
+        - label: I am willing to help implement or test it.

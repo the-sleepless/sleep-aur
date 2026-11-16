@@ -1,5 +1,10 @@
 # sleep-aur
 
+[![CI](https://github.com/the-sleepless/sleep-aur/actions/workflows/ci.yml/badge.svg)](https://github.com/the-sleepless/sleep-aur/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/the-sleepless/sleep-aur?display_name=tag&sort=semver)](https://github.com/the-sleepless/sleep-aur/releases/latest)
+[![License](https://img.shields.io/github/license/the-sleepless/sleep-aur)](LICENSE)
+[![Bash](https://img.shields.io/badge/language-Bash-4EAA25?logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
+
 > **A minimalist, auditable AUR helper for Arch Linux.**
 
 sleep-aur installs, updates, and removes packages from the [Arch User Repository](https://aur.archlinux.org/) without hiding what is happening. It is designed to be easy to audit, simple to maintain, and clean on your system.
@@ -13,6 +18,36 @@ sleep-aur installs, updates, and removes packages from the [Arch User Repository
 - Use a lock file to prevent concurrent runs.
 - Install from checksum-verified GitHub releases.
 - Provide both a command-line interface and an interactive shell.
+
+<p align="center">
+  <img src="docs/demo.svg" alt="sleep-aur terminal demo" width="900">
+</p>
+
+## Why sleep-aur?
+
+Most AUR helpers are large applications. sleep-aur deliberately stays small and auditable:
+
+- Written in Bash, with no `eval` and a small code surface.
+- Packages are tracked in a readable JSON database, not an opaque format.
+- Builds happen in temporary directories and are cleaned automatically.
+- The installer and the release archive are verified with SHA-256.
+- Follows the XDG base directory specification.
+- Handles split packages and recursive AUR dependencies.
+- Lets you review a `PKGBUILD` with `--edit` or `SLEEP_AUR_REVIEW=1`.
+
+If you need advanced features such as binary repository support or parallel builds, mature helpers like `yay` or `paru` may be a better fit. sleep-aur focuses on being easy to read, audit, and maintain.
+
+## At a glance
+
+| | |
+| --- | --- |
+| Language | Bash 5+ |
+| Package database | JSON |
+| AUR dependency resolution | Recursive |
+| Split packages | Yes |
+| PKGBUILD review | `--edit`, `SLEEP_AUR_REVIEW=1` |
+| Installer verification | SHA-256 |
+| Configuration | XDG base directory |
 
 ---
 
@@ -65,6 +100,18 @@ To uninstall:
 ./installer.sh --uninstall
 ./installer.sh --uninstall --purge
 ```
+
+### From the AUR
+
+An AUR package definition is maintained in [`packaging/aur`](packaging/aur). Once the package is published, install it with:
+
+```bash
+yay -S sleep-aur
+# or
+paru -S sleep-aur
+```
+
+See [`packaging/aur/README.md`](packaging/aur/README.md) for publishing and update instructions.
 
 ---
 
@@ -247,6 +294,8 @@ The configuration file is loaded as shell code and belongs to the user. Review t
 - `makepkg` runs as the user, never as root.
 - The installer refuses to overwrite a `sleep-aur` binary owned by a pacman package.
 
+To report a vulnerability privately, see [SECURITY.md](SECURITY.md).
+
 ---
 
 ## Development
@@ -269,6 +318,7 @@ Validate syntax:
 bash -n installer.sh
 bash -n src/sleep-aur
 bash -n src/lib/*.sh
+bash -n packaging/aur/PKGBUILD
 ```
 
 Lint:
@@ -297,6 +347,12 @@ It publishes:
 - `installer.sh.sha256`
 
 The installer downloads `releases/latest/download/sleep-aur.tar.gz` and verifies the matching checksum.
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, tests, and guidelines.
 
 ---
 

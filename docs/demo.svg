@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-label="sleep-aur terminal demo">
+  <rect width="960" height="560" fill="#010409"/>
+  <rect x="24" y="24" width="912" height="512" rx="14" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+
+  <circle cx="52" cy="48" r="6" fill="#ff5f56"/>
+  <circle cx="74" cy="48" r="6" fill="#ffbd2e"/>
+  <circle cx="96" cy="48" r="6" fill="#27c93f"/>
+  <text x="480" y="53" text-anchor="middle" fill="#8b949e" font-family="'JetBrains Mono','Fira Code',monospace" font-size="13">sleep-aur — Arch Linux</text>
+  <line x1="24" y1="70" x2="936" y2="70" stroke="#21262d" stroke-width="1"/>
+
+  <g font-family="'JetBrains Mono','Fira Code',monospace" font-size="14.5">
+    <text x="48" y="100" fill="#e6edf3"><tspan fill="#3fb950">$</tspan> sleep-aur search brave</text>
+    <text x="48" y="142" fill="#8b949e">Packages found:</text>
+    <text x="48" y="184" fill="#c9d1d9">  1) brave-bin   1.x.x-x (bin)   2.4k votes</text>
+    <text x="48" y="205" fill="#8b949e">     Brave browser, binaries</text>
+    <text x="48" y="247" fill="#c9d1d9">  2) brave       1.x.x-x         812 votes</text>
+    <text x="48" y="268" fill="#8b949e">     Brave browser</text>
+    <text x="48" y="310" fill="#e6edf3"><tspan fill="#3fb950">$</tspan> sleep-aur install -y brave-bin</text>
+    <text x="48" y="352" fill="#58a6ff">==&gt; Resolving dependencies...</text>
+    <text x="48" y="373" fill="#58a6ff">==&gt; Downloading PKGBUILD...</text>
+    <text x="48" y="394" fill="#58a6ff">==&gt; Building brave-bin...</text>
+    <text x="48" y="415" fill="#58a6ff">==&gt; Installing package...</text>
+    <text x="48" y="436" fill="#3fb950">[ok] brave-bin installed.</text>
+    <text x="48" y="478" fill="#e6edf3"><tspan fill="#3fb950">$</tspan> sleep-aur update --all</text>
+    <text x="48" y="520" fill="#3fb950">==&gt; All managed packages are up to date.</text>
+  </g>
+</svg>
